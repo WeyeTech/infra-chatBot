@@ -267,17 +267,18 @@ const VoiceChat = () => {
       console.log('Received response:', data);
       
       const botResponse = data.answer || 'No answer received';
-      const hasDiagram = botResponse.includes('[Open Interactive Diagram]');
-
-      // Extract the text before the diagram link
-      const textContent = hasDiagram 
-        ? botResponse.split('[Open Interactive Diagram]')[0].trim()
-        : botResponse;
+      const isHtmlResponse = botResponse.includes('.html');
 
       setMessages(prev => [...prev, { 
         type: 'bot', 
-        text: botResponse // Pass the full response for diagram extraction
+        text: botResponse,
+        isHtml: isHtmlResponse
       }]);
+
+      // Only speak if it's a text response
+      if (!isHtmlResponse) {
+        speakText(botResponse);
+      }
     } catch (error) {
       console.error('❌ Error in sendMessage:', error);
       const errorMessage = error.message.includes('fetch')
@@ -339,15 +340,14 @@ const VoiceChat = () => {
     console.log('Session state changed:', { sessionId, searchType, isListening });
   }, [sessionId, searchType, isListening]);
 
-  // Add function to handle voice button click
+  // Update handleVoiceClick to only work with text responses
   const handleVoiceClick = () => {
-    const lastBotMessage = messages.filter(m => m.type === 'bot').pop();
+    const lastBotMessage = messages.filter(m => m.type === 'bot' && !m.isHtml).pop();
     if (lastBotMessage) {
-      const textContent = lastBotMessage.text.split('[Open Interactive Diagram]')[0].trim();
       if (isSpeaking) {
         stopSpeaking();
       } else {
-        speakText(textContent);
+        speakText(lastBotMessage.text);
       }
     }
   };
@@ -422,23 +422,7 @@ const VoiceChat = () => {
                   textAlign: 'left'
                 }}>
                   {m.type === 'user' ? m.text : (
-                    m.type === 'bot' && m.text.includes('[Open Interactive Diagram]') ? (
-                      <>
-                        {m.text.split('[Open Interactive Diagram]')[0]}
-                        <a 
-                          href={m.text.match(/\[Open Interactive Diagram\]\(([^)]+)\)/)?.[1]}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{ 
-                            color: '#1976d2',
-                            textDecoration: 'underline',
-                            marginLeft: '4px'
-                          }}
-                        >
-                          Open Interactive Diagram
-                        </a>
-                      </>
-                    ) : m.text
+                    m.type === 'bot' && !m.isHtml ? m.text : ''
                   )}
                 </Typography>
               </Paper>

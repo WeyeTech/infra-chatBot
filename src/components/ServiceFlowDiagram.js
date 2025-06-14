@@ -1,27 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import './ServiceFlowDiagram.css';
 
 const ServiceFlowDiagram = ({ content }) => {
-  const [diagramUrl, setDiagramUrl] = useState(null);
-
-  useEffect(() => {
-    const extractHtmlPath = (text) => {
-      if (!text) return null;
-      const match = text.match(/\[Open Interactive Diagram\]\(([^)]+)\)/);
-      if (match) {
-        // Remove any leading slashes and ensure proper URL format
-        const path = match[1].replace(/^\/+/, '');
-        return path;
-      }
-      return null;
-    };
-
-    const url = extractHtmlPath(content);
-    console.log('Extracted diagram URL:', url); // Debug log
-    setDiagramUrl(url);
-  }, [content]);
-
-  if (!diagramUrl) {
+  if (!content || !content.includes('.html')) {
     return null;
   }
 
@@ -29,7 +10,7 @@ const ServiceFlowDiagram = ({ content }) => {
     <div className="container chat-container">
       <div className="diagram-container">
         <iframe 
-          src={diagramUrl}
+          src={content}
           style={{ width: '100%', height: '500px', border: 'none' }}
           title="Service Flow Diagram"
           onError={(e) => console.error('Error loading diagram:', e)}
