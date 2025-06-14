@@ -129,7 +129,7 @@ const VoiceChat = () => {
           sendMessage(textToSend);
           stopListening();
         }
-      }, 1000);
+      }, 2000);
     }
   }, [transcript, isListening]);
 
@@ -267,9 +267,17 @@ const VoiceChat = () => {
       console.log('Received response:', data);
       
       const botResponse = data.answer || 'No answer received';
+      const hasDiagram = botResponse.includes('[Open Interactive Diagram]');
 
-      setMessages(prev => [...prev, { type: 'bot', text: botResponse }]);
-      speakText(botResponse);
+      // Extract the text before the diagram link
+      const textContent = hasDiagram 
+        ? botResponse.split('[Open Interactive Diagram]')[0].trim()
+        : botResponse;
+
+      setMessages(prev => [...prev, { 
+        type: 'bot', 
+        text: botResponse // Pass the full response for diagram extraction
+      }]);
     } catch (error) {
       console.error('❌ Error in sendMessage:', error);
       const errorMessage = error.message.includes('fetch')
@@ -296,7 +304,9 @@ const VoiceChat = () => {
   const speakText = (text) => {
     if (!speechSynthesis) return;
 
+    // Stop any ongoing speech
     speechSynthesis.cancel();
+    
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
@@ -329,6 +339,19 @@ const VoiceChat = () => {
     console.log('Session state changed:', { sessionId, searchType, isListening });
   }, [sessionId, searchType, isListening]);
 
+  // Add function to handle voice button click
+  const handleVoiceClick = () => {
+    const lastBotMessage = messages.filter(m => m.type === 'bot').pop();
+    if (lastBotMessage) {
+      const textContent = lastBotMessage.text.split('[Open Interactive Diagram]')[0].trim();
+      if (isSpeaking) {
+        stopSpeaking();
+      } else {
+        speakText(textContent);
+      }
+    }
+  };
+
   if (!browserSupportsSpeechRecognition) {
     return <Typography>Browser doesn't support speech recognition.</Typography>;
   }
@@ -345,13 +368,13 @@ const VoiceChat = () => {
           alignItems: 'center' 
         }}>
           <Typography variant="h5" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <SmartToy /> AI Voice Assistant
+            <SmartToy /> AgentX
           </Typography>
           <Tooltip title={isSpeaking ? "Stop speaking" : "Play last response"}>
             <span>
               <IconButton 
                 color="inherit" 
-                onClick={isSpeaking ? stopSpeaking : () => speakText(messages[messages.length - 1]?.text)} 
+                onClick={handleVoiceClick}
                 disabled={!messages.length}
               >
                 {isSpeaking ? <VolumeOff /> : <VolumeUp />}
@@ -363,17 +386,17 @@ const VoiceChat = () => {
         {error && <Alert severity="error" style={{ margin: '10px' }}>{error}</Alert>}
 
         <Box style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px', background: '#fffaf0' }}>
-          <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '20px', display: 'flex', justifyContent: 'flex-start' }}>
             <FormControl variant="outlined" style={{ width: '300px' }}>
               <InputLabel>Select Search Type</InputLabel>
               <Select
                 value={searchType}
                 onChange={handleSearchTypeChange}
                 label="Select Search Type"
-                style={{ background: 'white' }}
+                style={{ background: 'white', textAlign: 'left' }}
               >
                 {searchTypes.map((type) => (
-                  <MenuItem key={type.value} value={type.value}>
+                  <MenuItem key={type.value} value={type.value} style={{ textAlign: 'left' }}>
                     {type.label}
                   </MenuItem>
                 ))}
@@ -382,7 +405,7 @@ const VoiceChat = () => {
           </Box>
 
           {messages.map((m, i) => (
-            <Box key={i} style={{ display: 'flex', justifyContent: m.type === 'user' ? 'flex-end' : 'flex-start', gap: '10px' }}>
+            <Box key={i} style={{ display: 'flex', justifyContent: m.type === 'user' ? 'flex-start' : 'flex-start', gap: '10px' }}>
               {m.type === 'bot' && <Avatar style={{ background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)' }}><SmartToy /></Avatar>}
               <Paper style={{ 
                 padding: '12px 16px', 
@@ -391,9 +414,33 @@ const VoiceChat = () => {
                 borderRadius: '15px',
                 maxWidth: '80%',
                 wordBreak: 'break-word',
-                overflowWrap: 'break-word'
+                overflowWrap: 'break-word',
+                textAlign: 'left'
               }}>
-                <Typography style={{ whiteSpace: 'pre-wrap' }}>{m.text}</Typography>
+                <Typography style={{ 
+                  whiteSpace: 'pre-wrap',
+                  textAlign: 'left'
+                }}>
+                  {m.type === 'user' ? m.text : (
+                    m.type === 'bot' && m.text.includes('[Open Interactive Diagram]') ? (
+                      <>
+                        {m.text.split('[Open Interactive Diagram]')[0]}
+                        <a 
+                          href={m.text.match(/\[Open Interactive Diagram\]\(([^)]+)\)/)?.[1]}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ 
+                            color: '#1976d2',
+                            textDecoration: 'underline',
+                            marginLeft: '4px'
+                          }}
+                        >
+                          Open Interactive Diagram
+                        </a>
+                      </>
+                    ) : m.text
+                  )}
+                </Typography>
               </Paper>
               {m.type === 'user' && <Avatar style={{ background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)' }}>U</Avatar>}
             </Box>
@@ -413,7 +460,7 @@ const VoiceChat = () => {
             borderRadius: 1,
             boxShadow: 1
           }}>
-            <ServiceFlowDiagram />
+            <ServiceFlowDiagram content={messages[messages.length - 1]?.text} />
           </Box>
         </Box>
 

@@ -1,123 +1,39 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './ServiceFlowDiagram.css';
 
-const ServiceFlowDiagram = () => {
-  const handleDiagramClick = () => {
-    const diagramWindow = window.open('', '_blank');
-    diagramWindow.document.write(` 
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Shield Value Service Flow</title>
-          <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
-          <style>
-            body {
-              margin: 0;
-              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            }
-            .container {
-              max-width: 1200px;
-              margin: 0 auto;
-              background: white;
-              border-radius: 15px;
-              box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-              overflow: hidden;
-            }
-            .header {
-              background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-              color: white;
-              padding: 30px;
-              text-align: center;
-            }
-            .header h1 {
-              margin: 0;
-              font-size: 2.5em;
-              font-weight: 300;
-            }
-            .diagram-container {
-              padding: 40px;
-              text-align: center;
-              background: #f8f9fa;
-            }
-            .mermaid {
-              background: white;
-              border-radius: 10px;
-              padding: 20px;
-              box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            }
-            .footer {
-              background: #2c3e50;
-              color: white;
-              padding: 20px;
-              text-align: center;
-              font-size: 0.9em;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>🔄 Shield Value Service Flow</h1>
-            </div>
-            <div class="diagram-container">
-              <div class="mermaid">
-                sequenceDiagram
-                    title Shield Value Service Flow
+const ServiceFlowDiagram = ({ content }) => {
+  const [diagramUrl, setDiagramUrl] = useState(null);
 
-                    participant Client
-                    participant Shield
-                    participant Vision
+  useEffect(() => {
+    const extractHtmlPath = (text) => {
+      if (!text) return null;
+      const match = text.match(/\[Open Interactive Diagram\]\(([^)]+)\)/);
+      if (match) {
+        // Remove any leading slashes and ensure proper URL format
+        const path = match[1].replace(/^\/+/, '');
+        return path;
+      }
+      return null;
+    };
 
-                    Client->>Shield: /banner
-                    Shield->>Vision: Inter-Service Call
-                    Vision->>Shield: Inter-Service Call
+    const url = extractHtmlPath(content);
+    console.log('Extracted diagram URL:', url); // Debug log
+    setDiagramUrl(url);
+  }, [content]);
 
-                    Note over Client,Vision: Shield Value Service Flow
-              </div>
-            </div>
-            <div class="footer">
-              Generated on ${new Date().toLocaleString()}
-            </div>
-          </div>
-          <script>
-            mermaid.initialize({ 
-              startOnLoad: true,
-              theme: 'default',
-              themeVariables: {
-                primaryColor: '#3498db',
-                primaryTextColor: '#2c3e50',
-                primaryBorderColor: '#2980b9',
-                lineColor: '#34495e',
-                secondaryColor: '#ecf0f1',
-                tertiaryColor: '#bdc3c7'
-              }
-            });
-          </script>
-        </body>
-      </html>
-    `);
-    diagramWindow.document.close();
-  };
+  if (!diagramUrl) {
+    return null;
+  }
 
   return (
-    <div className="container chat-container" onClick={handleDiagramClick} style={{ cursor: 'pointer' }}>
-      <div className="header chat-header">
-        <h1>🔄 Shield Value Service Flow</h1>
-        <div className="badge">Click to view full size</div>
-      </div>
-      
-      <div className="diagram-container chat-diagram">
-        <div className="mermaid">
-          {`sequenceDiagram title Shield Value Service Flow participant Client participant Shield participant Vision Client->>Shield: /banner
-            Shield->>Vision: Inter-Service Call
-            Vision->>Shield: Inter-Service Call
-            Note over Client,Vision: Shield Value Service Flow
-          `}
-        </div>
-      </div>
-      
-      <div className="footer chat-footer">
-        Generated on {new Date().toLocaleString()}
+    <div className="container chat-container">
+      <div className="diagram-container">
+        <iframe 
+          src={diagramUrl}
+          style={{ width: '100%', height: '500px', border: 'none' }}
+          title="Service Flow Diagram"
+          onError={(e) => console.error('Error loading diagram:', e)}
+        />
       </div>
     </div>
   );
