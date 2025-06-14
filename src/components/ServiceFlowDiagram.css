@@ -1,0 +1,83 @@
+/* Remove body styles that affect the entire page */
+.chat-container {
+    max-width: 100%;
+    margin: 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    background: white;
+}
+
+.chat-header {
+    padding: 15px;
+    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+    color: white;
+}
+
+.chat-header h1 {
+    font-size: 1.5em;
+    margin: 0;
+}
+
+.chat-diagram {
+    padding: 15px;
+    max-height: 300px;
+    overflow: auto;
+    background: #f8f9fa;
+}
+
+.chat-footer {
+    padding: 10px;
+    font-size: 0.8em;
+    background: #2c3e50;
+    color: white;
+}
+
+.badge {
+    display: inline-block;
+    background: #e74c3c;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    margin: 10px 5px;
+}
+
+.mermaid {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.header {
+    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+    color: white;
+    padding: 30px;
+    text-align: center;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 2.5em;
+    font-weight: 300;
+}
+
+.header p {
+    margin: 10px 0 0 0;
+    opacity: 0.9;
+    font-size: 1.1em;
+}
+
+.diagram-container {
+    padding: 40px;
+    text-align: center;
+    background: #f8f9fa;
+}
+
+.footer {
+    background: #2c3e50;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    font-size: 0.9em;
+} 
