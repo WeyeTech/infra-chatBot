@@ -20,8 +20,6 @@
 
 .chat-diagram {
     padding: 15px;
-    max-height: 300px;
-    overflow: auto;
     background: #f8f9fa;
 }
 

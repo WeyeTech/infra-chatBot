@@ -334,8 +334,8 @@ const VoiceChat = () => {
   }
 
   return (
-    <Container maxWidth="md" style={{ height: '100vh', padding: '20px', background: 'linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%)' }}>
-      <Paper elevation={3} style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#fffaf0' }}>
+    <Container maxWidth={false} disableGutters style={{ height: '100vh', padding: 0, margin: 0, background: 'linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%)' }}>
+      <Paper elevation={3} style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#fffaf0', margin: 0 }}>
         <Box style={{ 
           padding: '20px', 
           background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)', 
@@ -409,8 +409,6 @@ const VoiceChat = () => {
           {/* Service Flow Diagram */}
           <Box sx={{ 
             width: '100%', 
-            maxHeight: '400px', 
-            overflow: 'auto',
             bgcolor: 'white',
             borderRadius: 1,
             boxShadow: 1
