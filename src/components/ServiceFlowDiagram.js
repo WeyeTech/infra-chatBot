@@ -4,7 +4,7 @@ import './ServiceFlowDiagram.css';
 const ServiceFlowDiagram = () => {
   const handleDiagramClick = () => {
     const diagramWindow = window.open('', '_blank');
-    diagramWindow.document.write(`
+    diagramWindow.document.write(` 
       <!DOCTYPE html>
       <html>
         <head>
